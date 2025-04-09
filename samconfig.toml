@@ -1,0 +1,19 @@
+version=0.1
+
+[default]
+region = "us-east-1"
+
+[dev.deploy.parameters]
+stack_name = "eda-s3-notifier-dev"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=\"dev\""
+resolve_s3 = true
+s3_prefix = "eda-s3-notifier-dev"
+region = "us-east-1"
+confirm_changeset = true
+image_repositories = []
+
+[production.deploy.parameters]
+stack_name = "eda-s3-notifier-prod"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=production"

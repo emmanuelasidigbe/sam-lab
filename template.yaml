@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: S3 to SNS Email Notification via Lambda
+
+Globals:
+  Function:
+    Timeout: 10
+    Runtime: python3.11
+    Handler: app.lambda_handler
+    Architectures: [x86_64]
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "eda-upload-bucket-${Environment}"
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "eda-notification-topic-${Environment}"
+
+  EmailSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: email
+      TopicArn: !Ref NotificationTopic
+      Endpoint: "arkwashington52@gmail.com"
+
+  NotificationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "eda-s3-to-sns-${Environment}"
+      CodeUri: src/
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !Sub "eda-notification-topic-${Environment}"
+        - S3ReadPolicy:
+            BucketName: !Sub "eda-upload-bucket-${Environment}"
+      Environment:
+        Variables:
+          TOPIC_ARN: !Ref NotificationTopic
+      Events:
+        S3Upload:
+          Type: S3
+          Properties:
+            Bucket: !Ref S3Bucket
+            Events: s3:ObjectCreated:*
+
+Outputs:
+  BucketName:
+    Value: !Ref S3Bucket
+  SnsTopic:
+    Value: !Ref NotificationTopic
