@@ -38,5 +38,6 @@ jobs:
         run: |
           sam deploy \
             --config-env ${{ github.ref_name == 'main' && 'production' || 'dev' }} \
+            --config-file samconfig.toml \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
