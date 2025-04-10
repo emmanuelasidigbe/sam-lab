@@ -7,8 +7,7 @@ on:
       - dev
 
 env:
-  AWS_REGION: us-east-1
-
+  AWS_REGION: ${{ env.AWS_REGION }}
 jobs:
   deploy:
     runs-on: ubuntu-latest
