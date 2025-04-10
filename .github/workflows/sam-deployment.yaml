@@ -12,9 +12,14 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -29,12 +34,9 @@ jobs:
       - name: Build SAM Application
         run: sam build -t template.yaml
 
-      - name: Print deploy environment
-        run: echo "Deploying to ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}"
-
       - name: Deploy SAM App
         run: |
           sam deploy \
-            --config-env ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }} \
+            --config-env ${{ github.ref_name == 'main' && 'production' || 'dev' }} \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset
